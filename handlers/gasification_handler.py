@@ -11,6 +11,7 @@ from telegram.ext import (
 async def terrain(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
+        
         await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="где вы находитесь?",
