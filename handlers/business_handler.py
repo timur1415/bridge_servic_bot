@@ -8,7 +8,7 @@ from telegram.ext import (
     CallbackQueryHandler
 )
 
-async def kommbit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def business(update: Update, context: ContextTypes.DEFAULT_TYPE):
         query = update.callback_query
         await query.answer()
         await context.bot.send_message(

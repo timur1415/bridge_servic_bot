@@ -16,7 +16,7 @@ from handlers.gasification_handler import terrain
 
 from handlers.shop_handler import shop
 
-from handlers.kommbit_handler import kommbit
+from handlers.business_handler import business
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -27,12 +27,12 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
         [InlineKeyboardButton("газификация", callback_data="gasification")],
         [InlineKeyboardButton("магазин", callback_data="shop")],
-        [InlineKeyboardButton("коммбыт", callback_data="kommbit")],
+        [InlineKeyboardButton("газификация бизнеса", callback_data="business")],
     ]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="скоро тут будет бот для бридж сервиса...",
+        text="=)",
         reply_markup=markup,
     )
 
@@ -46,7 +46,7 @@ if __name__ == "__main__":
             MAIN_MENU: [
                 CallbackQueryHandler(terrain, pattern="^gasification$"),
                 CallbackQueryHandler(shop, pattern="^shop$"),
-                CallbackQueryHandler(kommbit, pattern='^kommbit$')
+                CallbackQueryHandler(business, pattern='^kommbit$')
             ]
         },
         fallbacks=[CommandHandler("start", start)]
