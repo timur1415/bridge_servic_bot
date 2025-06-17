@@ -13,12 +13,13 @@ from telegram.ext import (
     CallbackQueryHandler,
     MessageHandler,
     filters,
-    PicklePersistence
+    PicklePersistence,
 )
 
 from config.config import TOKEN
 
 from config.states import (
+    AGREED,
     TERRAIN,
     MAIN_MENU,
     SHOP,
@@ -35,6 +36,7 @@ from config.states import (
     NAME,
     NUMBER,
     FINISH,
+    FITTER
 )
 
 from handlers.gasification_handler import (
@@ -50,8 +52,11 @@ from handlers.gasification_handler import (
     name,
     number,
     finish,
-    gas_start
+    gas_start,
+    agreed
 )
+
+from handlers.shop_handler import fitter, agreeds
 
 from handlers.shop_handler import shop
 
@@ -81,28 +86,44 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_photo(
         chat_id=update.effective_chat.id,
         photo=open("photo/main.jpg", "rb"),
-        reply_markup=(markup),
+        reply_markup=markup,
     )
 
     return MAIN_MENU
 
 
 if __name__ == "__main__":
-    persistence = PicklePersistence(filepath='bridge_bot')
+    persistence = PicklePersistence(filepath="bridge_bot")
     application = ApplicationBuilder().token(TOKEN).persistence(persistence).build()
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
             MAIN_MENU: [
-                CallbackQueryHandler(gas_start, pattern="^gasification$"),
+                CallbackQueryHandler(agreeds, pattern="^gasification$"),
                 CallbackQueryHandler(shop, pattern="^shop$"),
                 CallbackQueryHandler(business, pattern="^business$"),
             ],
-            GAS_START:[MessageHandler(filters.TEXT & ~filters.COMMAND, gas_start),
+            SHOP: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, shop),
+                CallbackQueryHandler(fitter, pattern="^fitter$"),
+                CallbackQueryHandler(start, pattern="^market$"),
+                ],             
+            FITTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, fitter),
+                CallbackQueryHandler(agreed, pattern="^leave$"),
+            ],
+            AGREED: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, agreed),
+                CallbackQueryHandler(gas_start, pattern="^agreed$"),
+                CallbackQueryHandler(start, pattern="^no_agreed$"),
+            ],
+            GAS_START: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, gas_start),
                 CallbackQueryHandler(terrain, pattern="^start_gas$"),
-                CallbackQueryHandler(start, pattern="^back$"),],
-            TERRAIN:[MessageHandler(filters.TEXT & ~filters.COMMAND, terrain)],
+                CallbackQueryHandler(start, pattern="^back$"),
+            ],
+            TERRAIN: [MessageHandler(filters.TEXT & ~filters.COMMAND, terrain)],
             WHEN: [MessageHandler(filters.TEXT & ~filters.COMMAND, when)],
             PROJECT: [MessageHandler(filters.TEXT & ~filters.COMMAND, project)],
             ROOM: [MessageHandler(filters.TEXT & ~filters.COMMAND, room)],
@@ -118,7 +139,7 @@ if __name__ == "__main__":
                 CallbackQueryHandler(start, pattern="^main_menu$"),
             ],
         },
-        name='bridge_bot',
+        name="bridge_bot",
         persistent=True,
         fallbacks=[CommandHandler("start", start)],
     )

@@ -1,4 +1,3 @@
-import logging
 from telegram import (
     Update,
     InlineKeyboardButton,
@@ -7,13 +6,12 @@ from telegram import (
     ReplyKeyboardRemove,
 )
 from telegram.ext import (
-    ApplicationBuilder,
     ContextTypes,
 )
 
 from config.states import (
+    AGREED,
     GAS_START,
-    TERRAIN,
     WHEN,
     PROJECT,
     ROOM,
@@ -27,12 +25,14 @@ from config.states import (
     FINISH,
 )
 
-async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+
+async def agreed(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
     keyboard = [
         [
-            InlineKeyboardButton(
-                "РАССЧИТАТЬ СТОИМОСТЬ ГАЗИФИКАЦИИ", callback_data="start_gas"
-            )
+            InlineKeyboardButton("✅согласен✅", callback_data="agreed"),
+            InlineKeyboardButton("❌не согласен❌", callback_data="no_agreed"),
         ],
         [
             InlineKeyboardButton(
@@ -46,6 +46,22 @@ async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 url="https://bridge-service.ru/politika-konfidencialnosti/",
             )
         ],
+    ]
+    markup = InlineKeyboardMarkup(keyboard)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",reply_markup=markup
+    )
+    return AGREED
+
+
+async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                "РАССЧИТАТЬ СТОИМОСТЬ ГАЗИФИКАЦИИ", callback_data="start_gas"
+            )
+        ],
         [InlineKeyboardButton("в главное меню", callback_data="back")],
     ]
     markup = InlineKeyboardMarkup(keyboard)
@@ -57,6 +73,7 @@ async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=markup,
     )
     return GAS_START
+
 
 async def terrain(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query

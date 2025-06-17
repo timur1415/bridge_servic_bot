@@ -2,6 +2,7 @@
     MAIN_MENU,
     SHOP,
     BUSINESS,
+    AGREED,
     GAS_START,
     TERRAIN,
     WHEN,
@@ -14,5 +15,6 @@
     APPS,
     NAME,
     NUMBER,
+    FITTER,
     FINISH
-) = range(16)
+) = range(18)
