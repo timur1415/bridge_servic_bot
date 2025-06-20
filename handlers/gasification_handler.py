@@ -10,7 +10,7 @@ from telegram.ext import (
 )
 
 from config.states import (
-    AGREED,
+    AGREED_GAS,
     GAS_START,
     WHEN,
     PROJECT,
@@ -26,7 +26,7 @@ from config.states import (
 )
 
 
-async def agreed(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
     keyboard = [

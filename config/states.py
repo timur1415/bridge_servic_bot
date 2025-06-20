@@ -2,7 +2,8 @@
     MAIN_MENU,
     SHOP,
     BUSINESS,
-    AGREED,
+    AGREED_GAS,
+    AGREED_MOUNTER,
     GAS_START,
     TERRAIN,
     WHEN,
@@ -15,6 +16,9 @@
     APPS,
     NAME,
     NUMBER,
-    FITTER,
-    FINISH
-) = range(18)
+    MOUNTER,
+    FINISH,
+    NUMBER_MOUNTER,
+    COMMENT,
+    FINISH_AMOUNTER
+) = range(22)

@@ -19,12 +19,13 @@ from telegram.ext import (
 from config.config import TOKEN
 
 from config.states import (
-    AGREED,
-    TERRAIN,
     MAIN_MENU,
     SHOP,
     BUSINESS,
+    AGREED_GAS,
+    AGREED_MOUNTER,
     GAS_START,
+    TERRAIN,
     WHEN,
     PROJECT,
     ROOM,
@@ -35,8 +36,11 @@ from config.states import (
     APPS,
     NAME,
     NUMBER,
+    MOUNTER,
     FINISH,
-    FITTER
+    NUMBER_MOUNTER,
+    COMMENT,
+    FINISH_AMOUNTER
 )
 
 from handlers.gasification_handler import (
@@ -53,10 +57,10 @@ from handlers.gasification_handler import (
     number,
     finish,
     gas_start,
-    agreed
+    agreed_gas
 )
 
-from handlers.shop_handler import fitter, agreeds
+from handlers.mounter import fitter, agreeds_mounter, name_mounter, number_mounter, comment_mounter, finish_amounter
 
 from handlers.shop_handler import shop
 
@@ -100,7 +104,7 @@ if __name__ == "__main__":
         entry_points=[CommandHandler("start", start)],
         states={
             MAIN_MENU: [
-                CallbackQueryHandler(agreeds, pattern="^gasification$"),
+                CallbackQueryHandler(agreed_gas, pattern="^gasification$"),
                 CallbackQueryHandler(shop, pattern="^shop$"),
                 CallbackQueryHandler(business, pattern="^business$"),
             ],
@@ -108,13 +112,18 @@ if __name__ == "__main__":
                 MessageHandler(filters.TEXT & ~filters.COMMAND, shop),
                 CallbackQueryHandler(fitter, pattern="^fitter$"),
                 CallbackQueryHandler(start, pattern="^market$"),
-                ],             
-            FITTER: [
+                ],     
+            AGREED_MOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, agreeds_mounter),
+                CallbackQueryHandler(name_mounter, pattern="^agreed_mounter$"),
+                CallbackQueryHandler(start, pattern="^no_agreed_mounter$"),
+            ],       
+            MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, fitter),
-                CallbackQueryHandler(agreed, pattern="^leave$"),
+                CallbackQueryHandler(agreeds_mounter, pattern="^leave$"),
             ],
-            AGREED: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, agreed),
+            AGREED_GAS: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, agreed_gas),
                 CallbackQueryHandler(gas_start, pattern="^agreed$"),
                 CallbackQueryHandler(start, pattern="^no_agreed$"),
             ],
@@ -138,6 +147,9 @@ if __name__ == "__main__":
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
                 CallbackQueryHandler(start, pattern="^main_menu$"),
             ],
+            NUMBER_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)],
+            COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter)],
+            FINISH_AMOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)],
         },
         name="bridge_bot",
         persistent=True,
