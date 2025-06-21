@@ -8,7 +8,7 @@ from telegram.ext import (
     CallbackQueryHandler,
 )
 
-from config.states import SHOP, FITTER, AGREED_MOUNTER
+from config.states import SHOP
 
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):

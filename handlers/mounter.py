@@ -80,7 +80,7 @@ async def name_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def number_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Как вас зовут?",
+        text="Пожалуйста оставьте свой номер номер телефона",
     )
     return COMMENT
 
