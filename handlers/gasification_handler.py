@@ -52,7 +52,7 @@ async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         chat_id=update.effective_chat.id,
         text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",reply_markup=markup
     )
-    return AGREED
+    return AGREED_GAS
 
 
 async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):

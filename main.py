@@ -40,7 +40,7 @@ from config.states import (
     FINISH,
     NUMBER_MOUNTER,
     COMMENT,
-    FINISH_AMOUNTER
+    FINISH_AMOUNTER,
 )
 
 from handlers.gasification_handler import (
@@ -57,10 +57,17 @@ from handlers.gasification_handler import (
     number,
     finish,
     gas_start,
-    agreed_gas
+    agreed_gas,
 )
 
-from handlers.mounter import fitter, agreeds_mounter, name_mounter, number_mounter, comment_mounter, finish_amounter
+from handlers.mounter import (
+    fitter,
+    agreeds_mounter,
+    name_mounter,
+    number_mounter,
+    comment_mounter,
+    finish_amounter,
+)
 
 from handlers.shop_handler import shop
 
@@ -112,12 +119,12 @@ if __name__ == "__main__":
                 MessageHandler(filters.TEXT & ~filters.COMMAND, shop),
                 CallbackQueryHandler(fitter, pattern="^fitter$"),
                 CallbackQueryHandler(start, pattern="^market$"),
-                ],     
+            ],
             AGREED_MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, agreeds_mounter),
                 CallbackQueryHandler(name_mounter, pattern="^agreed_mounter$"),
                 CallbackQueryHandler(start, pattern="^no_agreed_mounter$"),
-            ],       
+            ],
             MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, fitter),
                 CallbackQueryHandler(agreeds_mounter, pattern="^leave$"),
@@ -147,9 +154,13 @@ if __name__ == "__main__":
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
                 CallbackQueryHandler(start, pattern="^main_menu$"),
             ],
-            NUMBER_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)],
+            NUMBER_MOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)
+            ],
             COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter)],
-            FINISH_AMOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)],
+            FINISH_AMOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)
+            ],
         },
         name="bridge_bot",
         persistent=True,
