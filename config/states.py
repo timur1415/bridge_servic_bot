@@ -20,5 +20,8 @@
     FINISH,
     NUMBER_MOUNTER,
     COMMENT,
-    FINISH_AMOUNTER
-) = range(22)
+    FINISH_AMOUNTER,
+    BRIDG_MARKET,
+    AGREED_MARKET,
+    NAME_MOUNTER
+) = range(25)

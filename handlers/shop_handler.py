@@ -12,6 +12,8 @@ from config.states import SHOP
 
 
 async def shop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
     keyboard = [
         [InlineKeyboardButton("МОНТАЖНИКАМ", callback_data="fitter")],
         [InlineKeyboardButton("Бридж-Маркет", callback_data="market")],

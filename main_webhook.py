@@ -46,6 +46,7 @@ from config.states import (
     SHOP,
     BUSINESS,
     AGREED_GAS,
+    AGREED_MARKET,
     AGREED_MOUNTER,
     GAS_START,
     TERRAIN,
@@ -63,7 +64,9 @@ from config.states import (
     FINISH,
     NUMBER_MOUNTER,
     COMMENT,
-    FINISH_AMOUNTER
+    FINISH_AMOUNTER,
+    BRIDG_MARKET,
+    NAME_MOUNTER
 )
 
 from handlers.gasification_handler import (
@@ -89,6 +92,7 @@ from handlers.shop_handler import shop
 
 from handlers.business_handler import business
 
+from handlers.bridg_market import magaz, agreed_market, delivery
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -142,7 +146,7 @@ async def main() -> None:
             SHOP: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, shop),
                 CallbackQueryHandler(fitter, pattern="^fitter$"),
-                CallbackQueryHandler(start, pattern="^market$"),
+                CallbackQueryHandler(magaz, pattern="^market$"),
                 ],     
             AGREED_MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, agreeds_mounter),
@@ -178,9 +182,19 @@ async def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
                 CallbackQueryHandler(start, pattern="^main_menu$"),
             ],
+            NAME_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, name_mounter)],
             NUMBER_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)],
-            COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter)],
+            COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter),
+                      CallbackQueryHandler(start, pattern='^main_menu_mounter$')],
             FINISH_AMOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)],
+            BRIDG_MARKET: [CallbackQueryHandler(start, pattern="^exit$"),
+                           CallbackQueryHandler(agreed_market, pattern='^buyer$'),
+                CallbackQueryHandler(magaz)],
+            AGREED_MARKET: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, agreed_market),
+                CallbackQueryHandler(delivery, pattern="^agreed_market$"),
+                CallbackQueryHandler(start, pattern="^no_agreed_market$"),
+            ],
         },
         name="bridge_bot",
         persistent=True,

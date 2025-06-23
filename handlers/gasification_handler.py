@@ -42,7 +42,7 @@ async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton(
-                "политику конфиденциальности",
+                "политика конфиденциальности",
                 url="https://bridge-service.ru/politika-konfidencialnosti/",
             )
         ],
@@ -56,6 +56,8 @@ async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()    
     keyboard = [
         [
             InlineKeyboardButton(

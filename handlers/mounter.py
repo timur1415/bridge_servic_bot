@@ -19,6 +19,8 @@ from config.states import SHOP, MOUNTER, AGREED_MOUNTER, NUMBER_MOUNTER, COMMENT
 
 async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
+    await query.answer()
+    query = update.callback_query
     query.answer()
     keyboard = [
         [InlineKeyboardButton("Оставить заявку", callback_data="leave")],
@@ -39,6 +41,8 @@ async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
     query = update.callback_query
     await query.answer()
     keyboard = [
@@ -73,6 +77,7 @@ async def name_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Как вас зовут?",
+        reply_markup=ReplyKeyboardRemove()
     )
     return NUMBER_MOUNTER
 
@@ -92,7 +97,10 @@ async def comment_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     return FINISH_AMOUNTER
 
 async def finish_amounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    keyboard = [[InlineKeyboardButton('в главное меню', callback_data='main_menu_mounter')]]
+    markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Спасибо за обращение! Мы свяжемся с Вами в ближайшее время",
+        reply_markup = markup
     )
