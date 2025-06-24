@@ -201,10 +201,11 @@ async def main() -> None:
             ],
             COMMENT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter),
-                CallbackQueryHandler(start, pattern="^main_menu_mounter$"),
+                
             ],
             FINISH_AMOUNTER: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter),
+                CallbackQueryHandler(start, pattern="^main_menu_mounter$"),
             ],
             BRIDG_MARKET: [
                 CallbackQueryHandler(start, pattern="^exit$"),
@@ -230,7 +231,7 @@ async def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, phone_business)
             ],
             FINISH_BUSINES: [
-                CallbackQueryHandler(start, pattern="^main_menu$"),
+                CallbackQueryHandler(start, pattern="^finish_business$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish_business),
             ],
         },
