@@ -1,4 +1,3 @@
-
 import asyncio
 import html
 import logging
@@ -66,7 +65,10 @@ from config.states import (
     COMMENT,
     FINISH_AMOUNTER,
     BRIDG_MARKET,
-    NAME_MOUNTER
+    NAME_MOUNTER,
+    PHONE_BUSINESS,
+    AGREED_BUSINES,
+    FINISH_BUSINES,
 )
 
 from handlers.gasification_handler import (
@@ -83,16 +85,24 @@ from handlers.gasification_handler import (
     number,
     finish,
     gas_start,
-    agreed_gas
+    agreed_gas,
 )
 
-from handlers.mounter import fitter, agreeds_mounter, name_mounter, number_mounter, comment_mounter, finish_amounter
+from handlers.mounter import (
+    fitter,
+    agreeds_mounter,
+    name_mounter,
+    number_mounter,
+    comment_mounter,
+    finish_amounter,
+)
 
 from handlers.shop_handler import shop
 
-from handlers.business_handler import business
+from handlers.business_handler import business, name_business, phone_business, finish_business, agree_business
 
 from handlers.bridg_market import magaz, agreed_market, delivery
+
 # Enable logging
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -101,6 +111,7 @@ logging.basicConfig(
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # message = await context.bot.send_message(
@@ -129,11 +140,11 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def main() -> None:
     persistence = PicklePersistence(filepath="bridge_bot")
-    application = (
-        Application.builder().token(TOKEN).persistence(persistence).build()
-    )
+    application = Application.builder().token(TOKEN).persistence(persistence).build()
 
-    await application.bot.set_webhook(url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES)
+    await application.bot.set_webhook(
+        url=f"{URL}/telegram", allowed_updates=Update.ALL_TYPES
+    )
 
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
@@ -147,12 +158,12 @@ async def main() -> None:
                 MessageHandler(filters.TEXT & ~filters.COMMAND, shop),
                 CallbackQueryHandler(fitter, pattern="^fitter$"),
                 CallbackQueryHandler(magaz, pattern="^market$"),
-                ],     
+            ],
             AGREED_MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, agreeds_mounter),
                 CallbackQueryHandler(name_mounter, pattern="^agreed_mounter$"),
                 CallbackQueryHandler(start, pattern="^no_agreed_mounter$"),
-            ],       
+            ],
             MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, fitter),
                 CallbackQueryHandler(agreeds_mounter, pattern="^leave$"),
@@ -179,21 +190,48 @@ async def main() -> None:
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
             NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number)],
             FINISH: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
                 CallbackQueryHandler(start, pattern="^main_menu$"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
             ],
-            NAME_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, name_mounter)],
-            NUMBER_MOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)],
-            COMMENT: [MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter),
-                      CallbackQueryHandler(start, pattern='^main_menu_mounter$')],
-            FINISH_AMOUNTER: [MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)],
-            BRIDG_MARKET: [CallbackQueryHandler(start, pattern="^exit$"),
-                           CallbackQueryHandler(agreed_market, pattern='^buyer$'),
-                CallbackQueryHandler(magaz)],
+            NAME_MOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, name_mounter)
+            ],
+            NUMBER_MOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)
+            ],
+            COMMENT: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter),
+                CallbackQueryHandler(start, pattern="^main_menu_mounter$"),
+            ],
+            FINISH_AMOUNTER: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter)
+            ],
+            BRIDG_MARKET: [
+                CallbackQueryHandler(start, pattern="^exit$"),
+                CallbackQueryHandler(agreed_market, pattern="^buyer$"),
+                CallbackQueryHandler(magaz),
+            ],
             AGREED_MARKET: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, agreed_market),
                 CallbackQueryHandler(delivery, pattern="^agreed_market$"),
                 CallbackQueryHandler(start, pattern="^no_agreed_market$"),
+            ],
+            BUSINESS: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, business),
+                CallbackQueryHandler(agree_business, pattern="^start_business$"),
+                CallbackQueryHandler(start, pattern="^beck_to_main_menu$"),
+            ],
+            AGREED_BUSINES: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, agreed_gas),
+                CallbackQueryHandler(name_business, pattern="^agreed_busines$"),
+                CallbackQueryHandler(start, pattern="^no_agreed_busines$"),
+            ],
+            PHONE_BUSINESS: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, phone_business)
+            ],
+            FINISH_BUSINES: [
+                CallbackQueryHandler(start, pattern="^main_menu$"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_business),
             ],
         },
         name="bridge_bot",
@@ -206,26 +244,25 @@ async def main() -> None:
     # Set up webserver
     fastapi_app = FastAPI()
 
-    @fastapi_app.post("/telegram")  
+    @fastapi_app.post("/telegram")
     async def telegram(req: Request) -> Response:
         data = await req.json()
-        await application.update_queue.put(Update.de_json(data=data, bot=application.bot))
+        await application.update_queue.put(
+            Update.de_json(data=data, bot=application.bot)
+        )
         return Response(status_code=status.HTTP_200_OK)
-
 
     @fastapi_app.get("/healthcheck")
     async def health() -> Response:
-        return Response('я жив', status_code=status.HTTP_200_OK, media_type='text/plain')
+        return Response(
+            "я жив", status_code=status.HTTP_200_OK, media_type="text/plain"
+        )
 
     webserver = uvicorn.Server(
         config=uvicorn.Config(
-            app=fastapi_app,
-            port=PORT,
-            host="0.0.0.0",
-            log_level = 'info' 
+            app=fastapi_app, port=PORT, host="0.0.0.0", log_level="info"
         )
     )
-
 
     async with application:
         await application.start()

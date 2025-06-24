@@ -5,7 +5,7 @@ from config.config import BITRIKS_URL
 
 async def crm_lead_add():
     async with AsyncBitrix24Client(
-        base_url="https://b24-huyq93.bitrix24.ru", access_token="s3hjh9c7ryxjtnsc"
+        base_url="https://b24-huyq93.bitrix24.ru", access_token="s3hjh9c7ryxjtnsc", user_id = 1
     ) as b24:
         result = await b24.call_method(
             "crm.lead.add",

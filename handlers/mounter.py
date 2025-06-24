@@ -43,8 +43,6 @@ async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    query = update.callback_query
-    await query.answer()
     keyboard = [
         [
             InlineKeyboardButton("✅согласен✅", callback_data="agreed_mounter"),
