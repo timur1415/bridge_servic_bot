@@ -25,6 +25,8 @@ from config.states import (
     FINISH,
 )
 
+from crm_lead_add import send_gasification_lead
+
 
 async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -36,13 +38,13 @@ async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton(
-                "согласие на передачу и обработку персональных данных",
+                "Согласие на передачу и обработку персональных данных",
                 url="https://bridge-service.ru/user/agreement/",
             )
         ],
         [
             InlineKeyboardButton(
-                "политика конфиденциальности",
+                "Политика конфиденциальности",
                 url="https://bridge-service.ru/politika-konfidencialnosti/",
             )
         ],
@@ -88,6 +90,8 @@ async def terrain(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def when(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['terrain'] = update.effective_message.text
+
     keyboard = [["в течении месяца"], ["в течении полугода"], ["в течении года"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -99,7 +103,9 @@ async def when(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def project(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [["да"], ["нет"]]
+    context.user_data['when'] = update.effective_message.text
+
+    keyboard = [["Да"], ["нет"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -110,7 +116,8 @@ async def project(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def room(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [["в одном"], ["в рразных"]]
+    context.user_data['project'] = update.effective_message.text
+    keyboard = [["в одном"], ["в разных"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -121,6 +128,7 @@ async def room(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def metre(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['room'] = update.effective_message.text
     keyboard = [["0-5"], ["5-10"], ["10-15"], ["15-25"], ["более 25"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -132,6 +140,7 @@ async def metre(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def fasade(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['metre'] = update.effective_message.text
     keyboard = [["0-5"], ["5-10"], ["10-15"], ["15-25"], ["более 25"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -143,6 +152,7 @@ async def fasade(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def pressure(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['fasade'] = update.effective_message.text
     keyboard = [["среднее", "низкое"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -154,6 +164,7 @@ async def pressure(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['pressure'] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Загрузите документы для заявления на газификацию:\n\nНеобходимые документы для газификации:\n\n1. Паспорт собственника: основная страница и прописка;\n2. Выписка ЕГРН на дом (все листы);\n3. Выписка ЕГРН на землю (все листы);\n4. Поэтажный план дома;\n5. СНИЛС;\n6. ИНН;\n7. Доверенность.",
@@ -163,7 +174,15 @@ async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [["watsApp"], ["звонок"]]
+    document = update.effective_message.document
+    print(document)
+    
+    file = await document.get_file()
+    file_path = await file.download_to_drive()
+    print(file_path)
+
+
+    keyboard = [["WhatsApp"], ["звонок"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -174,6 +193,7 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['apps'] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Напишите ваше имя.",
@@ -183,6 +203,7 @@ async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def number(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['name'] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id, text="Напишите ваш контактный номер телефона:"
     )
@@ -190,6 +211,7 @@ async def number(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data['number'] = update.effective_message.text
     keyboard = [
         [InlineKeyboardButton("вернутся в главное меню", callback_data="main_menu")]
     ]
@@ -199,3 +221,6 @@ async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="Спасибо за обращение! Мы свяжемся с Вами в ближайшее время",
         reply_markup=markup,
     )
+    gas_dict = {'name': context.user_data['name'], 'apps': context.user_data['apps'], 'pressure': context.user_data['pressure'], 'fasade': context.user_data['fasade'], 'metre': context.user_data['metre'], 'room': context.user_data['room'], 'project': context.user_data['project'], 'when': context.user_data['when'], 'terrain': context.user_data['terrain'], 'number': context.user_data['number']}
+    
+    await send_gasification_lead(gas_dict)

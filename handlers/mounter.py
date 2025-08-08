@@ -15,7 +15,17 @@ from telegram.ext import (
     filters,
     PicklePersistence,
 )
-from config.states import SHOP, MOUNTER, AGREED_MOUNTER, NUMBER_MOUNTER, COMMENT, FINISH_AMOUNTER
+from config.states import (
+    SHOP,
+    MOUNTER,
+    AGREED_MOUNTER,
+    NUMBER_MOUNTER,
+    COMMENT,
+    FINISH_AMOUNTER,
+)
+
+from crm_lead_add import send_mounter_lead
+
 
 async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -65,6 +75,7 @@ async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
+        # TODO pomenyt text
         text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",
         reply_markup=markup,
     )
@@ -75,30 +86,42 @@ async def name_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Как вас зовут?",
-        reply_markup=ReplyKeyboardRemove()
+        reply_markup=ReplyKeyboardRemove(),
     )
     return NUMBER_MOUNTER
 
 
 async def number_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["name_mounter"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Пожалуйста оставьте свой номер номер телефона",
     )
     return COMMENT
 
+
 async def comment_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["number_mounter"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Оставьте комментарий, что именно вы хотите приобрести",
     )
     return FINISH_AMOUNTER
 
+
 async def finish_amounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    keyboard = [[InlineKeyboardButton('в главное меню', callback_data='main_menu_mounter')]]
+    context.user_data["comment_mounter"] = update.effective_message.text
+    keyboard = [
+        [InlineKeyboardButton("в главное меню", callback_data="main_menu_mounter")]
+    ]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Спасибо за обращение! Мы свяжемся с Вами в ближайшее время",
-        reply_markup = markup
+        reply_markup=markup,
+    )
+    await send_mounter_lead(
+        context.user_data["name_mounter"],
+        context.user_data["comment_mounter"],
+        context.user_data["number_mounter"],
     )

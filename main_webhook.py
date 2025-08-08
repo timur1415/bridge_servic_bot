@@ -237,7 +237,7 @@ async def main() -> None:
         },
         name="bridge_bot",
         persistent=True,
-        fallbacks=[CommandHandler("start", start)],
+        fallbacks=[CommandHandler("start", start), MessageHandler(filters.Document.ALL, apps)],
     )
 
     application.add_handler(conv_handler)
