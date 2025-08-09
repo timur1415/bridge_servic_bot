@@ -121,16 +121,16 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # message = await context.bot.send_message(
     #     chat_id=update.effective_chat.id,
-    #     text="извините",
+    #     text="Извините",
     #     reply_markup=ReplyKeyboardRemove(),
     # )
     # await context.bot.delete_message(
     #     chat_id=update.effective_chat.id, message_id=message.id
     # )
     keyboard = [
-        [InlineKeyboardButton("газификация", callback_data="gasification")],
-        [InlineKeyboardButton("магазин", callback_data="shop")],
-        [InlineKeyboardButton("газификация бизнеса", callback_data="business")],
+        [InlineKeyboardButton("Газификация", callback_data="gasification")],
+        [InlineKeyboardButton("Магазин", callback_data="shop")],
+        [InlineKeyboardButton("Газификация бизнеса", callback_data="business")],
     ]
     markup = InlineKeyboardMarkup(keyboard)
 
@@ -191,7 +191,11 @@ async def main() -> None:
             FACADE: [MessageHandler(filters.TEXT & ~filters.COMMAND, fasade)],
             PRESSURE: [MessageHandler(filters.TEXT & ~filters.COMMAND, pressure)],
             DOCUMENTS: [MessageHandler(filters.TEXT & ~filters.COMMAND, documents)],
-            APPS: [MessageHandler(filters.TEXT & ~filters.COMMAND, apps)],
+            APPS: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, apps),
+                MessageHandler(filters.Document.ALL, apps),
+                MessageHandler(filters.PHOTO, apps),
+            ],
             NAME: [MessageHandler(filters.TEXT & ~filters.COMMAND, name)],
             NUMBER: [MessageHandler(filters.TEXT & ~filters.COMMAND, number)],
             FINISH: [
@@ -225,12 +229,12 @@ async def main() -> None:
             BUSINESS: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, business),
                 CallbackQueryHandler(agree_business, pattern="^start_business$"),
-                CallbackQueryHandler(start, pattern="^beck_to_main_menu$"),
+                CallbackQueryHandler(start, pattern="^back_to_main_menu$"),
             ],
             AGREED_BUSINES: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, agreed_gas),
-                CallbackQueryHandler(name_business, pattern="^agreed_busines$"),
-                CallbackQueryHandler(start, pattern="^no_agreed_busines$"),
+                CallbackQueryHandler(name_business, pattern="^agreed_business$"),
+                CallbackQueryHandler(start, pattern="^no_agreed_business$"),
             ],
             PHONE_BUSINESS: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, phone_business)
@@ -273,7 +277,7 @@ async def main() -> None:
     @fastapi_app.get("/healthcheck")
     async def health() -> Response:
         return Response(
-            "я жив", status_code=status.HTTP_200_OK, media_type="text/plain"
+            "Я жив", status_code=status.HTTP_200_OK, media_type="text/plain"
         )
 
     webserver = uvicorn.Server(

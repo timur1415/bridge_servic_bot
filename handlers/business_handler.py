@@ -20,7 +20,7 @@ async def business(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 "Наш сайт",
                 url="https://bridge-service.ru/gazifikaciya-kommercheskih-ob-ektov/",
             ),
-            InlineKeyboardButton("выход", callback_data="beck_to_main_menu"),
+            InlineKeyboardButton("Выход", callback_data="back_to_main_menu"),
         ],
     ]
     markup = InlineKeyboardMarkup(keyboard)
@@ -39,18 +39,18 @@ async def agree_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("✅согласен✅", callback_data="agreed_busines"),
-            InlineKeyboardButton("❌не согласен❌", callback_data="no_agreed_busines"),
+            InlineKeyboardButton("✅Согласен✅", callback_data="agreed_business"),
+            InlineKeyboardButton("❌Не согласен❌", callback_data="no_agreed_business"),
         ],
         [
             InlineKeyboardButton(
-                "согласие на передачу и обработку персональных данных",
+                "Согласие на передачу и обработку персональных данных",
                 url="https://bridge-service.ru/user/agreement/",
             )
         ],
         [
             InlineKeyboardButton(
-                "политику конфиденциальности",
+                "Политика конфиденциальности",
                 url="https://bridge-service.ru/politika-konfidencialnosti/",
             )
         ],
@@ -73,16 +73,16 @@ async def name_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def phone_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['name'] = update.effective_message.text
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="какой у вас номер телефона"
+        chat_id=update.effective_chat.id, text="Какой у вас номер телефона"
     )
     return FINISH_BUSINES
 
 async def finish_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data['phone'] = update.effective_message.text
-    keyboard = [[InlineKeyboardButton('выход', callback_data='finish_business')]]
+    keyboard = [[InlineKeyboardButton('Выход', callback_data='finish_business')]]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="спасибо за обращение в ближайшее время мы с вами свяжемся", reply_markup=markup
+        chat_id=update.effective_chat.id, text="Спасибо за обращение в ближайшее время мы с вами свяжемся", reply_markup=markup
     )
 
     print(context.user_data['phone'], context.user_data['name'])

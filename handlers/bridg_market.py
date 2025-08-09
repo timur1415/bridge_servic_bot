@@ -31,7 +31,7 @@ async def magaz(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton("⬅️", callback_data="left"),
             InlineKeyboardButton("➡️", callback_data="right"),
         ],
-        [InlineKeyboardButton("выход", callback_data="exit")],
+        [InlineKeyboardButton("Выход", callback_data="exit")],
         [InlineKeyboardButton("Оставить заявку", callback_data="buyer")],
     ]
 
@@ -69,12 +69,12 @@ async def agreed_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("✅согласен✅", callback_data="agreed_market"),
-            InlineKeyboardButton("❌не согласен❌", callback_data="no_agreed_market"),
+            InlineKeyboardButton("✅Согласен✅", callback_data="agreed_market"),
+            InlineKeyboardButton("❌Не согласен❌", callback_data="no_agreed_market"),
         ],
         [
             InlineKeyboardButton(
-                "согласие на передачу и обработку персональных данных",
+                "Согласие на передачу и обработку персональных данных",
                 url="https://bridge-service.ru/user/agreement/",
             )
         ],
@@ -91,7 +91,7 @@ async def agreed_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    keyboard = [["до квартиры"], ["до подъезда"], ["самовывоз"]]
+    keyboard = [["До квартиры"], ["До подъезда"], ["Самовывоз"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
@@ -115,7 +115,7 @@ async def number_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["name"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Пожалуйста оставьте свой номер номер телефона",
+        text="Пожалуйста, оставьте номер телефона",
     )
     return COMMENT_MARKET
 
@@ -132,7 +132,7 @@ async def comment_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def finish_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["comment"] = update.effective_message.text
     keyboard = [
-        [InlineKeyboardButton("в главное меню", callback_data="main_menu_market")]
+        [InlineKeyboardButton("В главное меню", callback_data="main_menu_market")]
     ]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(

@@ -30,8 +30,6 @@ from servises.crm_lead_add import send_mounter_lead
 async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
-    query = update.callback_query
-    query.answer()
     keyboard = [
         [InlineKeyboardButton("Оставить заявку", callback_data="leave")],
         [
@@ -55,18 +53,18 @@ async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
     keyboard = [
         [
-            InlineKeyboardButton("✅согласен✅", callback_data="agreed_mounter"),
-            InlineKeyboardButton("❌не согласен❌", callback_data="no_agreed_mounter"),
+            InlineKeyboardButton("✅Согласен✅", callback_data="agreed_mounter"),
+            InlineKeyboardButton("❌Не согласен❌", callback_data="no_agreed_mounter"),
         ],
         [
             InlineKeyboardButton(
-                "согласие на передачу и обработку персональных данных",
+                "Согласие на передачу и обработку персональных данных",
                 url="https://bridge-service.ru/user/agreement/",
             )
         ],
         [
             InlineKeyboardButton(
-                "политику конфиденциальности",
+                "Политика конфиденциальности",
                 url="https://bridge-service.ru/politika-konfidencialnosti/",
             )
         ],
@@ -95,7 +93,7 @@ async def number_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["name_mounter"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Пожалуйста оставьте свой номер номер телефона",
+        text="Пожалуйста, оставьте номер телефона",
     )
     return COMMENT
 
@@ -112,7 +110,7 @@ async def comment_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def finish_amounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     context.user_data["comment_mounter"] = update.effective_message.text
     keyboard = [
-        [InlineKeyboardButton("в главное меню", callback_data="main_menu_mounter")]
+        [InlineKeyboardButton("В главное меню", callback_data="main_menu_mounter")]
     ]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
