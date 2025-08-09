@@ -24,7 +24,7 @@ from config.states import (
     FINISH_AMOUNTER,
 )
 
-from crm_lead_add import send_mounter_lead
+from servises.crm_lead_add import send_mounter_lead
 
 
 async def fitter(update: Update, context: ContextTypes.DEFAULT_TYPE):

@@ -65,10 +65,13 @@ from config.states import (
     COMMENT,
     FINISH_AMOUNTER,
     BRIDG_MARKET,
-    NAME_MOUNTER,
+    NAME_MARKET,
     PHONE_BUSINESS,
     AGREED_BUSINES,
     FINISH_BUSINES,
+    FINISH_MARKET,
+    NUMBER_MARKET,
+    COMMENT_MARKET
 )
 
 from handlers.gasification_handler import (
@@ -87,6 +90,8 @@ from handlers.gasification_handler import (
     gas_start,
     agreed_gas,
 )
+
+from handlers.bridg_market import name_market, number_market, comment_market, finish_market
 
 from handlers.mounter import (
     fitter,
@@ -193,8 +198,8 @@ async def main() -> None:
                 CallbackQueryHandler(start, pattern="^main_menu$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
             ],
-            NAME_MOUNTER: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, name_mounter)
+            NAME_MARKET: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, name_market)
             ],
             NUMBER_MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)
@@ -234,6 +239,18 @@ async def main() -> None:
                 CallbackQueryHandler(start, pattern="^finish_business$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish_business),
             ],
+            NUMBER_MARKET: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, number_market)
+            ],
+            COMMENT_MARKET: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, comment_market),
+                
+            ],
+            FINISH_MARKET: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, finish_market),
+                CallbackQueryHandler(start, pattern="^main_menu_market$"),
+            ],
+
         },
         name="bridge_bot",
         persistent=True,

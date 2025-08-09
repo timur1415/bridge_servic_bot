@@ -25,7 +25,7 @@ from config.states import (
     FINISH,
 )
 
-from crm_lead_add import send_gasification_lead
+from servises.crm_lead_add import send_gasification_lead
 
 
 async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):

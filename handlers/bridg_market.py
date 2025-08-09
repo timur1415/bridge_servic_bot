@@ -4,13 +4,23 @@ from telegram import (
     InlineKeyboardMarkup,
     InputMediaPhoto,
     ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
 )
 from telegram.ext import (
     ContextTypes,
 )
-from config.states import BRIDG_MARKET, AGREED_MARKET, NAME_MOUNTER
+from config.states import (
+    BRIDG_MARKET,
+    AGREED_MARKET,
+    NAME_MARKET,
+    COMMENT_MARKET,
+    FINISH_MARKET,
+    NUMBER_MARKET,
+)
 
 from config.tovari import GOODS_INFO
+
+from servises.crm_lead_add import send_market_lead
 
 
 async def magaz(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -53,6 +63,7 @@ async def magaz(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     return BRIDG_MARKET
 
+
 async def agreed_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -71,9 +82,11 @@ async def agreed_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",reply_markup=markup
+        text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",
+        reply_markup=markup,
     )
     return AGREED_MARKET
+
 
 async def delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -83,6 +96,53 @@ async def delivery(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Выберите вариант доставки",
-        reply_markup=markup
+        reply_markup=markup,
     )
-    return NAME_MOUNTER
+    return NAME_MARKET
+
+
+async def name_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["delivery"] = update.effective_message.text
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Как вас зовут?",
+        reply_markup=ReplyKeyboardRemove(),
+    )
+    return NUMBER_MARKET
+
+
+async def number_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["name"] = update.effective_message.text
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Пожалуйста оставьте свой номер номер телефона",
+    )
+    return COMMENT_MARKET
+
+
+async def comment_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["number"] = update.effective_message.text
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Оставьте комментарий, что именно вы хотите приобрести",
+    )
+    return FINISH_MARKET
+
+
+async def finish_market(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    context.user_data["comment"] = update.effective_message.text
+    keyboard = [
+        [InlineKeyboardButton("в главное меню", callback_data="main_menu_market")]
+    ]
+    markup = InlineKeyboardMarkup(keyboard)
+    await context.bot.send_message(
+        chat_id=update.effective_chat.id,
+        text="Спасибо за обращение! Мы свяжемся с Вами в ближайшее время",
+        reply_markup=markup,
+    )
+    await send_market_lead(
+        context.user_data["delivery"],
+        context.user_data["name"],
+        context.user_data["number"],
+        context.user_data["comment"],
+    )
