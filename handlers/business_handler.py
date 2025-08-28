@@ -1,14 +1,10 @@
-import logging
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import (
-    ApplicationBuilder,
-    ContextTypes,
-    CommandHandler,
-    ConversationHandler,
-    CallbackQueryHandler,
-)
-from config.states import BUSINESS, AGREED_BUSINES, FINISH_BUSINES, PHONE_BUSINESS
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.ext import (
+    ContextTypes,
+)
+
+from config.states import AGREED_BUSINES, BUSINESS, FINISH_BUSINES, PHONE_BUSINESS
 from servises.crm_lead_add import send_business_lead
 
 

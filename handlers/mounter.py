@@ -1,29 +1,20 @@
-import logging
 from telegram import (
-    Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     ReplyKeyboardRemove,
+    Update,
 )
 from telegram.ext import (
-    ApplicationBuilder,
     ContextTypes,
-    CommandHandler,
-    ConversationHandler,
-    CallbackQueryHandler,
-    MessageHandler,
-    filters,
-    PicklePersistence,
-)
-from config.states import (
-    SHOP,
-    MOUNTER,
-    AGREED_MOUNTER,
-    NUMBER_MOUNTER,
-    COMMENT,
-    FINISH_AMOUNTER,
 )
 
+from config.states import (
+    AGREED_MOUNTER,
+    COMMENT,
+    FINISH_AMOUNTER,
+    MOUNTER,
+    NUMBER_MOUNTER,
+)
 from servises.crm_lead_add import send_mounter_lead
 
 

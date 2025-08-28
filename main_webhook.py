@@ -1,112 +1,99 @@
 import asyncio
-import html
 import logging
-from dataclasses import dataclass
-from http import HTTPStatus
 
 import uvicorn
 from fastapi import FastAPI, Request, Response, status
-
-from telegram import Update
-from telegram.constants import ParseMode
-from telegram.ext import (
-    Application,
-    CallbackContext,
-    CommandHandler,
-    ContextTypes,
-    ExtBot,
-    TypeHandler,
-)
-
-from config.config import URL, PORT, TOKEN
-
-import logging
 from telegram import (
-    Update,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    ReplyKeyboardRemove,
+    Update,
 )
 from telegram.ext import (
-    ApplicationBuilder,
-    ContextTypes,
-    CommandHandler,
-    ConversationHandler,
+    Application,
     CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    ConversationHandler,
     MessageHandler,
-    filters,
     PicklePersistence,
+    filters,
 )
 
-from config.config import TOKEN
-
+from config.config import PORT, TOKEN, URL
 from config.states import (
-    MAIN_MENU,
-    SHOP,
-    BUSINESS,
+    AGREED_BUSINES,
     AGREED_GAS,
     AGREED_MARKET,
     AGREED_MOUNTER,
-    GAS_START,
-    TERRAIN,
-    WHEN,
-    PROJECT,
-    ROOM,
-    METRE,
-    FACADE,
-    PRESSURE,
-    DOCUMENTS,
     APPS,
-    NAME,
-    NUMBER,
-    MOUNTER,
-    FINISH,
-    NUMBER_MOUNTER,
-    COMMENT,
-    FINISH_AMOUNTER,
     BRIDG_MARKET,
-    NAME_MARKET,
-    PHONE_BUSINESS,
-    AGREED_BUSINES,
+    BUSINESS,
+    COMMENT,
+    COMMENT_MARKET,
+    DOCUMENTS,
+    FACADE,
+    FINISH,
+    FINISH_AMOUNTER,
     FINISH_BUSINES,
     FINISH_MARKET,
+    GAS_START,
+    MAIN_MENU,
+    METRE,
+    MOUNTER,
+    NAME,
+    NAME_MARKET,
+    NUMBER,
     NUMBER_MARKET,
-    COMMENT_MARKET
+    NUMBER_MOUNTER,
+    PHONE_BUSINESS,
+    PRESSURE,
+    PROJECT,
+    ROOM,
+    SHOP,
+    TERRAIN,
+    WHEN,
 )
-
+from handlers.bridg_market import (
+    agreed_market,
+    comment_market,
+    delivery,
+    finish_market,
+    magaz,
+    name_market,
+    number_market,
+)
+from handlers.business_handler import (
+    agree_business,
+    business,
+    finish_business,
+    name_business,
+    phone_business,
+)
 from handlers.gasification_handler import (
-    terrain,
-    when,
-    project,
-    room,
-    metre,
-    fasade,
-    pressure,
-    documents,
+    agreed_gas,
     apps,
-    name,
-    number,
+    documents,
+    fasade,
     finish,
     gas_start,
-    agreed_gas,
+    metre,
+    name,
+    number,
+    pressure,
+    project,
+    room,
+    terrain,
+    when,
 )
-
-from handlers.bridg_market import name_market, number_market, comment_market, finish_market
-
 from handlers.mounter import (
-    fitter,
     agreeds_mounter,
-    name_mounter,
-    number_mounter,
     comment_mounter,
     finish_amounter,
+    fitter,
+    name_mounter,
+    number_mounter,
 )
-
 from handlers.shop_handler import shop
-
-from handlers.business_handler import business, name_business, phone_business, finish_business, agree_business
-
-from handlers.bridg_market import magaz, agreed_market, delivery
 
 # Enable logging
 logging.basicConfig(
@@ -202,15 +189,12 @@ async def main() -> None:
                 CallbackQueryHandler(start, pattern="^main_menu$"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish),
             ],
-            NAME_MARKET: [
-                MessageHandler(filters.TEXT & ~filters.COMMAND, name_market)
-            ],
+            NAME_MARKET: [MessageHandler(filters.TEXT & ~filters.COMMAND, name_market)],
             NUMBER_MOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, number_mounter)
             ],
             COMMENT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comment_mounter),
-                
             ],
             FINISH_AMOUNTER: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish_amounter),
@@ -248,17 +232,18 @@ async def main() -> None:
             ],
             COMMENT_MARKET: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, comment_market),
-                
             ],
             FINISH_MARKET: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, finish_market),
                 CallbackQueryHandler(start, pattern="^main_menu_market$"),
             ],
-
         },
         name="bridge_bot",
         persistent=True,
-        fallbacks=[CommandHandler("start", start), MessageHandler(filters.Document.ALL, apps)],
+        fallbacks=[
+            CommandHandler("start", start),
+            MessageHandler(filters.Document.ALL, apps),
+        ],
     )
 
     application.add_handler(conv_handler)
