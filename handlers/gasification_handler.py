@@ -52,14 +52,15 @@ async def agreed_gas(update: Update, context: ContextTypes.DEFAULT_TYPE):
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",reply_markup=markup
+        text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",
+        reply_markup=markup,
     )
     return AGREED_GAS
 
 
 async def gas_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()    
+    await query.answer()
     keyboard = [
         [
             InlineKeyboardButton(
@@ -90,7 +91,7 @@ async def terrain(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def when(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['terrain'] = update.effective_message.text
+    context.user_data["terrain"] = update.effective_message.text
 
     keyboard = [["В течение месяца"], ["В течение полугода"], ["В течение года"]]
     markup = ReplyKeyboardMarkup(keyboard)
@@ -103,7 +104,7 @@ async def when(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def project(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['when'] = update.effective_message.text
+    context.user_data["when"] = update.effective_message.text
 
     keyboard = [["Да"], ["Нет"]]
     markup = ReplyKeyboardMarkup(keyboard)
@@ -116,7 +117,7 @@ async def project(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def room(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['project'] = update.effective_message.text
+    context.user_data["project"] = update.effective_message.text
     keyboard = [["В одном"], ["В разных"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -128,7 +129,7 @@ async def room(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def metre(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['room'] = update.effective_message.text
+    context.user_data["room"] = update.effective_message.text
     keyboard = [["0-5"], ["5-10"], ["10-15"], ["15-25"], ["Более 25"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -140,7 +141,7 @@ async def metre(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def fasade(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['metre'] = update.effective_message.text
+    context.user_data["metre"] = update.effective_message.text
     keyboard = [["0-5"], ["5-10"], ["10-15"], ["15-25"], ["Более 25"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -152,7 +153,7 @@ async def fasade(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def pressure(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['fasade'] = update.effective_message.text
+    context.user_data["fasade"] = update.effective_message.text
     keyboard = [["Среднее", "Низкое"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -164,7 +165,7 @@ async def pressure(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['pressure'] = update.effective_message.text
+    context.user_data["pressure"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Загрузите документы для заявления на газификацию (можно отправить несколько файлов и фото подряд). После загрузки напишите 'Готово'.\n\nНеобходимые документы для газификации:\n\n1. Паспорт собственника: основная страница и прописка;\n2. Выписка ЕГРН на дом (все листы);\n3. Выписка ЕГРН на землю (все листы);\n4. Поэтажный план дома;\n5. СНИЛС;\n6. ИНН;\n7. Доверенность.",
@@ -176,19 +177,21 @@ async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Поддержка документов и фото. Сохраняем локальные пути загруженных файлов
     message = update.effective_message
-    files_list = context.user_data.get('files', [])
+    files_list = context.user_data.get("files", [])
 
     if message.document:
         document = message.document
         file = await document.get_file()
         path = await file.download_to_drive()
-        files_list.append({
-            'name': document.file_name or 'document',
-            'path': str(path),
-            'mime': document.mime_type,
-            'size': document.file_size,
-        })
-        context.user_data['files'] = files_list
+        files_list.append(
+            {
+                "name": document.file_name or "document",
+                "path": str(path),
+                "mime": document.mime_type,
+                "size": document.file_size,
+            }
+        )
+        context.user_data["files"] = files_list
         # Позволяем отправить ещё документы без перехода вперёд
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
@@ -201,13 +204,15 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
         photo = message.photo[-1]
         file = await photo.get_file()
         path = await file.download_to_drive()
-        files_list.append({
-            'name': 'photo.jpg',
-            'path': str(path),
-            'mime': 'image/jpeg',
-            'size': photo.file_size,
-        })
-        context.user_data['files'] = files_list
+        files_list.append(
+            {
+                "name": "photo.jpg",
+                "path": str(path),
+                "mime": "image/jpeg",
+                "size": photo.file_size,
+            }
+        )
+        context.user_data["files"] = files_list
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
             text="Фото добавлено. Можешь отправить ещё или напиши 'Готово'.",
@@ -215,7 +220,7 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return APPS
 
     # Любой текст трактуем как сигнал завершения загрузки
-    context.user_data['apps'] = message.text
+    context.user_data["apps"] = message.text
     keyboard = [["WhatsApp"], ["Звонок"]]
     markup = ReplyKeyboardMarkup(keyboard)
     await context.bot.send_message(
@@ -227,7 +232,7 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['apps'] = update.effective_message.text
+    context.user_data["apps"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Напишите ваше имя.",
@@ -237,7 +242,7 @@ async def name(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def number(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['name'] = update.effective_message.text
+    context.user_data["name"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id, text="Напишите ваш контактный номер телефона:"
     )
@@ -245,7 +250,7 @@ async def number(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['number'] = update.effective_message.text
+    context.user_data["number"] = update.effective_message.text
     keyboard = [
         [InlineKeyboardButton("Вернуться в главное меню", callback_data="main_menu")]
     ]
@@ -256,17 +261,17 @@ async def finish(update: Update, context: ContextTypes.DEFAULT_TYPE):
         reply_markup=markup,
     )
     gas_dict = {
-        'name': context.user_data['name'],
-        'apps': context.user_data['apps'],
-        'pressure': context.user_data['pressure'],
-        'fasade': context.user_data['fasade'],
-        'metre': context.user_data['metre'],
-        'room': context.user_data['room'],
-        'project': context.user_data['project'],
-        'when': context.user_data['when'],
-        'terrain': context.user_data['terrain'],
-        'number': context.user_data['number'],
-        'files': context.user_data.get('files', []),
+        "name": context.user_data["name"],
+        "apps": context.user_data["apps"],
+        "pressure": context.user_data["pressure"],
+        "fasade": context.user_data["fasade"],
+        "metre": context.user_data["metre"],
+        "room": context.user_data["room"],
+        "project": context.user_data["project"],
+        "when": context.user_data["when"],
+        "terrain": context.user_data["terrain"],
+        "number": context.user_data["number"],
+        "files": context.user_data.get("files", []),
     }
-    
+
     await send_gasification_lead(gas_dict)

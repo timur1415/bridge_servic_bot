@@ -105,21 +105,21 @@ async def send_gasification_lead(gas_dict):
             lead_id = lead_add
 
         # Только загрузка файлов на Диск с наименованием "<LEAD_ID> файл 1", "<LEAD_ID> файл 2", ...
-        files = gas_dict.get('files') or []
+        files = gas_dict.get("files") or []
         if files:
             try:
                 folder_id = int(BITRIKS_DISK_FOLDER_ID)
                 index = 1
                 for f in files:
-                    file_path = f.get('path')
-                    original_name = f.get('name') or 'file'
+                    file_path = f.get("path")
+                    original_name = f.get("name") or "file"
                     if not file_path:
                         continue
                     base, ext = os.path.splitext(original_name)
-                    safe_ext = ext if ext else ''
+                    safe_ext = ext if ext else ""
                     new_name = f"{lead_id} файл {index}{safe_ext}"
                     try:
-                        with open(file_path, 'rb') as fh:
+                        with open(file_path, "rb") as fh:
                             content_bytes = fh.read()
                         encoded = base64.b64encode(content_bytes).decode()
                         res = await b24.call_method(
@@ -147,7 +147,12 @@ async def send_gasification_lead(gas_dict):
         return lead_add
 
 
-async def send_market_lead(delivery, name, number, comment,):
+async def send_market_lead(
+    delivery,
+    name,
+    number,
+    comment,
+):
     async with AsyncBitrix24Client(
         base_url=BITRIKS_URL,
         access_token=BITRIKS_ACCESS_KEY,
@@ -160,10 +165,33 @@ async def send_market_lead(delivery, name, number, comment,):
                 "fields": {
                     "TITLE": title,
                     "NAME": name,
-                    "COMMENTS": f'товар - {comment}, доставка - {delivery}',
+                    "COMMENTS": f"товар - {comment}, доставка - {delivery}",
                     "PHONE": [{"VALUE": number, "VALUE_TYPE": "WORK"}],
                     "SOURCE_ID": "WEBFORM",
                     "SOURCE_DESCRIPTION": "Телеграм бот магазин",
+                },
+                "params": {"REGISTER_SONET_EVENT": "Y"},
+            },
+        )
+        return result
+
+
+async def send_business_lead(phone, name):
+    async with AsyncBitrix24Client(
+        base_url=BITRIKS_URL,
+        access_token=BITRIKS_ACCESS_KEY,
+        user_id=1,
+    ) as b24:
+        title = f"Заявка на газификацию бизнеса {name}"
+        result = await b24.call_method(
+            "crm.lead.add",
+            params={
+                "fields": {
+                    "TITLE": title,
+                    "NAME": name,
+                    "PHONE": [{"VALUE": phone, "VALUE_TYPE": "WORK"}],
+                    "SOURCE_ID": "WEBFORM",
+                    "SOURCE_DESCRIPTION": "Телеграм бот газ бизнес",
                 },
                 "params": {"REGISTER_SONET_EVENT": "Y"},
             },

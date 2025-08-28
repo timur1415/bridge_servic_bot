@@ -81,6 +81,8 @@ async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def name_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
         text="Как вас зовут?",

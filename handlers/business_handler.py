@@ -9,6 +9,8 @@ from telegram.ext import (
 )
 from config.states import BUSINESS, AGREED_BUSINES, FINISH_BUSINES, PHONE_BUSINESS
 
+from servises.crm_lead_add import send_business_lead
+
 
 async def business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -70,19 +72,24 @@ async def name_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
     )
     return PHONE_BUSINESS
 
+
 async def phone_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['name'] = update.effective_message.text
+    context.user_data["name"] = update.effective_message.text
     await context.bot.send_message(
         chat_id=update.effective_chat.id, text="Какой у вас номер телефона"
     )
     return FINISH_BUSINES
 
+
 async def finish_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    context.user_data['phone'] = update.effective_message.text
-    keyboard = [[InlineKeyboardButton('Выход', callback_data='finish_business')]]
+    context.user_data["phone"] = update.effective_message.text
+    keyboard = [[InlineKeyboardButton("Выход", callback_data="finish_business")]]
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
-        chat_id=update.effective_chat.id, text="Спасибо за обращение в ближайшее время мы с вами свяжемся", reply_markup=markup
+        chat_id=update.effective_chat.id,
+        text="Спасибо за обращение в ближайшее время мы с вами свяжемся",
+        reply_markup=markup,
     )
 
-    print(context.user_data['phone'], context.user_data['name'])
+    print(context.user_data["phone"], context.user_data["name"])
+    await send_business_lead(context.user_data["phone"], context.user_data["name"])
