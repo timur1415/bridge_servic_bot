@@ -55,7 +55,6 @@ async def send_gasification_lead(gas_dict):
         user_id=1,
     ) as b24:
         title = f"Заказ на газификацию от {gas_dict['name']}"
-        # Собираем текст комментария (без ссылок TG, так как по политике безопасности B24 они могут не открываться)
         comment_lines = [
             f"Заказчику удобнее получить расчёт через {gas_dict['apps']}",
             f"Давление в газопроводе: {gas_dict['pressure']}",
@@ -84,7 +83,6 @@ async def send_gasification_lead(gas_dict):
             },
         )
 
-        # Пробуем надёжно извлечь числовой ID лида из ответа API
         def _extract_lead_id(maybe_id):
             if isinstance(maybe_id, int):
                 return maybe_id
@@ -104,7 +102,6 @@ async def send_gasification_lead(gas_dict):
             print("Unable to extract lead ID from response:", lead_add)
             lead_id = lead_add
 
-        # Только загрузка файлов на Диск с наименованием "<LEAD_ID> файл 1", "<LEAD_ID> файл 2", ...
         files = gas_dict.get("files") or []
         if files:
             try:
@@ -132,7 +129,7 @@ async def send_gasification_lead(gas_dict):
                             },
                         )
                         print("Uploaded to Disk:", new_name, res)
-                        # Удаляем локальный файл после удачной загрузки
+                        
                         try:
                             os.remove(file_path)
                             print("Local file removed:", file_path)

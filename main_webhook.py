@@ -267,7 +267,7 @@ async def main() -> None:
 
     webserver = uvicorn.Server(
         config=uvicorn.Config(
-            app=fastapi_app, port=PORT, host="0.0.0.0", log_level="info"
+            app=fastapi_app, port=PORT, host="127.0.0.1", log_level="info"
         )
     )
 
