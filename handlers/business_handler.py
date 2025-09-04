@@ -86,6 +86,4 @@ async def finish_business(update: Update, context: ContextTypes.DEFAULT_TYPE):
         text="Спасибо за обращение в ближайшее время мы с вами свяжемся",
         reply_markup=markup,
     )
-
-    print(context.user_data["phone"], context.user_data["name"])
     await send_business_lead(context.user_data["phone"], context.user_data["name"])

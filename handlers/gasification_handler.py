@@ -175,7 +175,6 @@ async def documents(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    # Поддержка документов и фото. Сохраняем локальные пути загруженных файлов
     message = update.effective_message
     files_list = context.user_data.get("files", [])
 
@@ -200,7 +199,6 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return APPS
 
     if message.photo:
-        # Берём самое большое фото из массива
         photo = message.photo[-1]
         file = await photo.get_file()
         path = await file.download_to_drive()
@@ -219,7 +217,6 @@ async def apps(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return APPS
 
-    # Любой текст трактуем как сигнал завершения загрузки
     context.user_data["apps"] = message.text
     keyboard = [["WhatsApp"], ["Звонок"]]
     markup = ReplyKeyboardMarkup(keyboard)
