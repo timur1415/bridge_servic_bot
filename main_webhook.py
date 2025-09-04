@@ -241,7 +241,7 @@ async def main() -> None:
     # Set up webserver
     fastapi_app = FastAPI()
 
-    @fastapi_app.post("/telegram")
+    @fastapi_app.post("/bs/telegram")
     async def telegram(req: Request) -> Response:
         data = await req.json()
         await application.update_queue.put(
@@ -249,7 +249,7 @@ async def main() -> None:
         )
         return Response(status_code=status.HTTP_200_OK)
 
-    @fastapi_app.get("/healthcheck")
+    @fastapi_app.get("/bs/healthcheck")
     async def health() -> Response:
         return Response(
             "Я жив", status_code=status.HTTP_200_OK, media_type="text/plain"
