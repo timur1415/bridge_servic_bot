@@ -64,7 +64,6 @@ async def agreeds_mounter(update: Update, context: ContextTypes.DEFAULT_TYPE):
     markup = InlineKeyboardMarkup(keyboard)
     await context.bot.send_message(
         chat_id=update.effective_chat.id,
-        # TODO pomenyt text
         text="Для определения стоимости услуг газификации необходимо ваше согласие на обработку и передачу персональных данных.",
         reply_markup=markup,
     )

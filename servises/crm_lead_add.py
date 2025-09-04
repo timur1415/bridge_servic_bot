@@ -1,27 +1,14 @@
 import base64
+import logging
 import os
 from bitrix24_client import AsyncBitrix24Client
-from config.config import BITRIKS_URL, BITRIKS_ACCESS_KEY, BITRIKS_DISK_FOLDER_ID
+from config.config import (
+    BITRIKS_URL,
+    BITRIKS_ACCESS_KEY,
+    BITRIKS_LEAD_FILES_FIELD,
+)
 
-
-async def crm_lead_add():
-    async with AsyncBitrix24Client(
-        base_url="https://b24-huyq93.bitrix24.ru",
-        access_token="s3hjh9c7ryxjtnsc",
-        user_id=1,
-    ) as b24:
-        result = await b24.call_method(
-            "crm.lead.add",
-            params={
-                "fields": {
-                    "TITLE": "API    Lead",
-                    "NAME": "TIMUR",
-                    "PHONE": [{"VALUE": "+7 9999999999", "VALUE_TYPE": "WORK"}],
-                },
-                "params": {"REGISTER_SONET_EVENT": "Y"},
-            },
-        )
-        print(result)
+logger = logging.getLogger(__name__)
 
 
 async def send_mounter_lead(name_mounter, comment_mounter, number_mounter):
@@ -67,79 +54,66 @@ async def send_gasification_lead(gas_dict):
 
         comment_text = ", ".join(comment_lines)
 
+        lead_fields = {
+            "TITLE": title,
+            "NAME": gas_dict["name"],
+            "ADDRESS": gas_dict["terrain"],
+            "COMMENTS": comment_text,
+            "PHONE": [{"VALUE": gas_dict["number"], "VALUE_TYPE": "WORK"}],
+            "SOURCE_ID": "WEBFORM",
+            "SOURCE_DESCRIPTION": "Телеграм бот газификация",
+        }
+
         lead_add = await b24.call_method(
             "crm.lead.add",
             params={
-                "fields": {
-                    "TITLE": title,
-                    "NAME": gas_dict["name"],
-                    "ADDRESS": gas_dict["terrain"],
-                    "COMMENTS": comment_text,
-                    "PHONE": [{"VALUE": gas_dict["number"], "VALUE_TYPE": "WORK"}],
-                    "SOURCE_ID": "WEBFORM",
-                    "SOURCE_DESCRIPTION": "Телеграм бот газификация",
-                },
+                "fields": lead_fields,
                 "params": {"REGISTER_SONET_EVENT": "Y"},
             },
         )
+        logger.info("Добавил лид в CRM: %s", lead_add)
 
-        def _extract_lead_id(maybe_id):
-            if isinstance(maybe_id, int):
-                return maybe_id
-            if isinstance(maybe_id, str) and maybe_id.isdigit():
-                return int(maybe_id)
-            if isinstance(maybe_id, dict):
-                for key in ("result", "ID", "id", "data"):
-                    if key in maybe_id:
-                        nested = maybe_id[key]
-                        got = _extract_lead_id(nested)
-                        if got is not None:
-                            return got
-            return None
-
-        lead_id = _extract_lead_id(lead_add)
+        
+        lead_id = lead_add
         if lead_id is None:
-            print("Unable to extract lead ID from response:", lead_add)
+            logger.warning("Не удалось извлечь ID лида из ответа: %s", lead_add)
             lead_id = lead_add
 
         files = gas_dict.get("files") or []
-        if files:
+        payload = []
+        paths_to_delete = []
+        for f in files:
+            file_path = f.get("path")
+            original_name = f.get("name") or "file"
+            if not file_path or not os.path.exists(file_path):
+                continue
             try:
-                folder_id = int(BITRIKS_DISK_FOLDER_ID)
-                index = 1
-                for f in files:
-                    file_path = f.get("path")
-                    original_name = f.get("name") or "file"
-                    if not file_path:
-                        continue
-                    base, ext = os.path.splitext(original_name)
-                    safe_ext = ext if ext else ""
-                    new_name = f"{lead_id} файл {index}{safe_ext}"
+                with open(file_path, "rb") as fh:
+                    content_bytes = fh.read()
+                encoded = base64.b64encode(content_bytes).decode()
+                payload.append({"fileData": [original_name, encoded]})
+                paths_to_delete.append(file_path)
+            except Exception as err:
+                logger.error("Не удалось прочитать файл: %s %s", file_path, err)
+
+        if lead_id and BITRIKS_LEAD_FILES_FIELD and payload:
+            try:
+                update_res = await b24.call_method(
+                    "crm.lead.update",
+                    params={
+                        "id": lead_id,
+                        "fields": {BITRIKS_LEAD_FILES_FIELD: payload},
+                    },
+                )
+                logger.info("Добавил файлы в поле лида: %s %s", lead_id, update_res)
+                for p in paths_to_delete:
                     try:
-                        with open(file_path, "rb") as fh:
-                            content_bytes = fh.read()
-                        encoded = base64.b64encode(content_bytes).decode()
-                        res = await b24.call_method(
-                            "disk.folder.uploadfile",
-                            params={
-                                "id": folder_id,
-                                "data": {"NAME": new_name},
-                                "fileContent": encoded,
-                                "generateUniqueName": "Y",
-                            },
-                        )
-                        print("Uploaded to Disk:", new_name, res)
-                        
-                        try:
-                            os.remove(file_path)
-                            print("Local file removed:", file_path)
-                        except Exception as rm_err:
-                            print("Local file remove failed:", file_path, rm_err)
-                        index += 1
-                    except Exception as up_err:
-                        print(f"Disk upload failed for {new_name}:", up_err)
-            except Exception as e:
-                print("Upload to configured disk folder failed:", e)
+                        os.remove(p)
+                        logger.info("Удалил локальный файл: %s", p)
+                    except Exception as rm_err:
+                        logger.warning("Не удалось удалить локальный файл: %s %s", p, rm_err)
+            except Exception as upd_err:
+                logger.error("Не удалось добавить файлы в поле лида: %s %s", lead_id, upd_err)
 
         return lead_add
 
